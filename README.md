@@ -1,4 +1,4 @@
-### Fine-tuned OpenVLA-oft Model for Robotic Assembly Tasks
+# Fine-tuned OpenVLA-oft Model for Robotic Assembly Tasks
 
 This repository contains code and configurations for fine-tuning the OpenVLA-oft model on engine-block based assembly tasks and subsequently evaluating the fine-tuned VLA model. 
 
@@ -12,7 +12,7 @@ Specs for fine-tuning:
 Submitted slurm batch file seen in openvla-oft/run_openvla_oft_assembly_wandb.sh 
 
 ## 1. Configure Environment
-# Set-up Conda Environment
+### Set-up Conda Environment
 it is 
 ```bash
 # Create and activate conda environment
@@ -36,9 +36,9 @@ pip install "flash-attn==2.5.5" --no-build-isolation # not essential
 ```
 
 ## 2. Fine-tune Base OpenVLA-oft Model
-# run finetune.py on tensforflow-based RLDS dataset formed via rlds_dataset_builder-main/assembly_robot_data
-# note that action chunking is defined within openvla-oft/prismatic/vla/constants.py
-# fine-tuning script:
+
+The finetune.py script is ran on a tensforflow-based RLDS dataset formed from rlds_dataset_builder-main/assembly_robot_data.
+It is noted that that action chunking is defined within openvla-oft/prismatic/vla/constants.py.
 
 ```bash
 torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
@@ -67,9 +67,9 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
 ```
 
 ## 3. Use Fine-tuned Model
-# Input: joint angles (dim 7), gripper state (dim 1), language instruction, side image (480, 640, 3), wrist image (480, 640, 3)
-# Output: (x8 chunks) joint control (dim 7), gripper state (dim 1)
-# Model evaluation script:
+Input: joint angles (dim 7), gripper state (dim 1), language instruction, side image (480, 640, 3), wrist image (480, 640, 3)
+Output: (x8 chunks) joint control (dim 7), gripper state (dim 1)
+Model evaluation script:
 
 ```bash
 import os
