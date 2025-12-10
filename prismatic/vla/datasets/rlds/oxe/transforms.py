@@ -857,13 +857,11 @@ def assembly_robot_data_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
 
     Both state and action are already in JOINT / JOINT_POS form.
     """
-    # If state has extra components (e.g., velocities), keep first 8 entries:
     traj_state = trajectory["observation"]["state"]
-    trajectory["observation"]["state"] = traj_state[..., :8]
+    trajectory["observation"]["state"] = traj_state[..., :7]
 
-    # Likewise, ensure action is joints + gripper (8 dims); truncate if longer:
     traj_action = trajectory["action"]
-    trajectory["action"] = traj_action[..., :8]
+    trajectory["action"] = traj_action[..., :7]
     return trajectory
 
 

@@ -70,8 +70,8 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
 
 The fine-tuned model forms a policy based on the following inputs and outputs:
 
-- **Input:** joint angles (dim 7), gripper state (dim 1), language instruction, side image (480, 640, 3), wrist image (480, 640, 3)  
-- **Output:** 8-step action chunk: joint control (dim 7), gripper state (dim 1)
+- **Input:** joint angles (dim 6), gripper state (dim 1), language instruction, side image (480, 640, 3), wrist image (480, 640, 3)  
+- **Output:** 5-step action chunk: joint control (dim 6), gripper state (dim 1)
 
 To evaluate the model, the following Python script may be used:
 
@@ -92,7 +92,7 @@ from prismatic.vla.constants import NUM_ACTIONS_CHUNK, PROPRIO_DIM
 CHECKPOINT = "/openvla-oft/checkpoints/openvla_assembly_robot/openvla-7b+assembly_robot_data+b1+lr-0.0005+lora-r32+dropout-0.0--image_aug--assembly_robot_jointpos_wrist_side_film_l1" # included checkpoint based on finetuning script above
 IMG_PATH_SIDE = "/PATH/TO/side_image.png" # (480, 640, 3)
 IMG_PATH_WRIST = "/PATH/TO/wrist_image.png" # (480, 640, 3)
-STATE_PATH = "/PATH/TO/states.npy" # (8,)
+STATE_PATH = "/PATH/TO/states.npy" # (7,)
 INSTRUCTION = "put the valve cover assembly onto the cylinder head" # text string
 
 cfg = GenerateConfig(

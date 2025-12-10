@@ -45,16 +45,16 @@ class AssemblyRobotData(tfds.core.GeneratorBasedBuilder):
                                         doc="Wrist camera RGB observation (480x640x3).",
                                     ),
                                     "state": tfds.features.Tensor(
-                                        shape=(8,),
+                                        shape=(7,),
                                         dtype=np.float32,
                                         doc="Robot state: 8-D vector (joint + gripper state).",
                                     ),
                                 }
                             ),
                             "action": tfds.features.Tensor(
-                                shape=(8,),
+                                shape=(7,),
                                 dtype=np.float32,
-                                doc="Robot action: 8-D control vector (joint + gripper command).",
+                                doc="Robot action: 7-D control vector (joint + gripper command).",
                             ),
                             "discount": tfds.features.Scalar(
                                 dtype=np.float32,
@@ -112,7 +112,7 @@ class AssemblyRobotData(tfds.core.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Split generators."""
-        rlds_dir = "/scratch/pioneer/users/exr343/kth_incoming/rlds_ds"
+        rlds_dir = "/scratch/pioneer/users/exr343/kth_incoming/rlds_ds_7dim"
         return {
             "train": self._generate_examples(rlds_dir),
         }
