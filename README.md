@@ -39,7 +39,9 @@ pip install "flash-attn==2.5.5" --no-build-isolation # not essential
 
 The finetune.py script is run on a TensorFlow-based RLDS dataset formed from rlds_dataset_builder-main/assembly_robot_data. In particular, 86 demonstrations were recorded of a UR5 robot placing a valve cover assembly onto an engine cylinder head. Each demonstration consists of a variable number of timesteps. For each timestep, joint and gripper angles are recorded as the robot state, side image and wrist images are recorded as the observation, and joint and gripper control values are recorded as the action.
 
-It is noted that that action chunking is defined within prismatic/vla/constants.py, which is set to 5 in this model. The following code snippet is used to fine-tune the base model.
+It is noted that that action chunking is defined within prismatic/vla/constants.py, which is set to 5 in this model. 10% of available data is reserved for validation. 
+
+The following code snippet is used to fine-tune the base model.
 
 ```bash
 torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
@@ -52,20 +54,25 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --use_film True \
   --num_images_in_input 2 \
   --use_proprio True \
-  --batch_size 1 \
+  --batch_size 8 \
   --learning_rate 5e-4 \
   --num_steps_before_decay 50000 \
   --max_steps 100005 \
-  --use_val_set False \
+  --use_val_set True \
+  --val_freq 5000 \
   --save_freq 5000 \
   --save_latest_checkpoint_only True \
   --image_aug True \
-  --lora_rank 32 \
+  --lora_rank 48 \
   --wandb_entity "YOUR_WANDB_ENTITY" \
   --wandb_project "YOUR_WANDB_PROJECT" \
   --run_id_note "MODEL_NAME"
 
 ```
+Training loss over the training steps is seen in the figure below:
+![Training L1 Loss](images/Training_Loss_L1.png)
+And likewise, the validation loss is seen in the following figure:
+![Validation L1 Loss](images/Validation_Loss_L1.png)
 
 ## 3. Use Fine-tuned Model
 
