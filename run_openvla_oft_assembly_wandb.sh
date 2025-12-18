@@ -22,21 +22,21 @@ export WANDB_PROJECT="Robotic_Assembly"
 
 torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --vla_path "openvla/openvla-7b" \
-  --data_root_dir "/scratch/pioneer/users/exr343/tensorflow_datasets" \
+  --data_root_dir "/home/exr343/datasets/TFDS" \
   --dataset_name "assembly_robot_data" \
   --run_root_dir "/home/exr343/checkpoints/openvla_assembly_robot" \
   --use_l1_regression True \
   --use_diffusion False \
   --use_film True \
-  --num_images_in_input 2 \
+  --num_images_in_input 3 \
   --use_proprio True \
   --batch_size 8 \
   --learning_rate 5e-4 \
-  --num_steps_before_decay 50000 \
-  --max_steps 100005 \
+  --num_steps_before_decay 7500 \
+  --max_steps 10005 \
   --use_val_set True \
-  --val_freq 5000 \
-  --save_freq 50000 \
+  --val_freq 1000 \
+  --save_freq 5000 \
   --save_latest_checkpoint_only True \
   --image_aug True \
   --lora_rank 48 \

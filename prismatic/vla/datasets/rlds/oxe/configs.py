@@ -708,9 +708,9 @@ OXE_DATASET_CONFIGS = {
     },
     "assembly_robot_data": {
         "image_obs_keys": {
-            "primary":   "image",
-            "secondary": None,
-            "wrist":     "wrist_image",
+            "primary":   "image0",
+            "secondary": "image1",
+            "wrist":     "image_wrist",
         },
         "depth_obs_keys": {
             "primary":   None,
@@ -720,10 +720,10 @@ OXE_DATASET_CONFIGS = {
 
         "state_obs_keys": ["state"],
 
-        "state_encoding":  StateEncoding.JOINT,
+        "state_encoding":  StateEncoding.POS_EULER,
         "action_encoding": ActionEncoding.JOINT_POS,
 
-        "absolute_action_mask":      [False, False, False, False, False, False, True],
-        "action_normalization_mask": [True,  True,  True,  True,  True,  True,  False],
+        "absolute_action_mask": [True, True, True, True, True, True, True],
+        "action_normalization_mask": [True,  True,  True,  True,  True,  True,  True],
     },
 }

@@ -9,7 +9,7 @@ import time
 from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type
 
 import draccus
 import torch
@@ -963,8 +963,12 @@ def finetune(cfg: FinetuneConfig) -> None:
     # )
     # ---
 
-    # We assume that the model takes as input one third-person camera image and 1 or 2 optional wrist camera image(s)
-    use_wrist_image = cfg.num_images_in_input > 1
+    # Determine which additional camera views (beyond the primary one) to include.
+    additional_image_obs_keys: List[str] = []
+    if cfg.num_images_in_input >= 3:
+        additional_image_obs_keys.append("image_secondary")
+    if cfg.num_images_in_input >= 2:
+        additional_image_obs_keys.append("image_wrist")
 
     # Create training and optional validation datasets
     batch_transform = RLDSBatchTransform(
@@ -972,7 +976,7 @@ def finetune(cfg: FinetuneConfig) -> None:
         processor.tokenizer,
         image_transform=processor.image_processor.apply_transform,
         prompt_builder_fn=PurePromptBuilder,
-        use_wrist_image=use_wrist_image,
+        additional_image_obs_keys=tuple(additional_image_obs_keys),
         use_proprio=cfg.use_proprio,
     )
     train_dataset = RLDSDataset(

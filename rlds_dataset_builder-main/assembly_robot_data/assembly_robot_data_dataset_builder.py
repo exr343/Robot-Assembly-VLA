@@ -32,13 +32,19 @@ class AssemblyRobotData(tfds.core.GeneratorBasedBuilder):
                         {
                             "observation": tfds.features.FeaturesDict(
                                 {
-                                    "image": tfds.features.Image(
+                                    "image0": tfds.features.Image(
+                                        shape=(480, 640, 3),
+                                        dtype=np.uint8,
+                                        encoding_format="png",
+                                        doc="Front camera RGB observation (480x640x3).",
+                                    ),
+                                    "image1": tfds.features.Image(
                                         shape=(480, 640, 3),
                                         dtype=np.uint8,
                                         encoding_format="png",
                                         doc="Side camera RGB observation (480x640x3).",
                                     ),
-                                    "wrist_image": tfds.features.Image(
+                                    "image_wrist": tfds.features.Image(
                                         shape=(480, 640, 3),
                                         dtype=np.uint8,
                                         encoding_format="png",
@@ -47,7 +53,7 @@ class AssemblyRobotData(tfds.core.GeneratorBasedBuilder):
                                     "state": tfds.features.Tensor(
                                         shape=(7,),
                                         dtype=np.float32,
-                                        doc="Robot state: 7-D vector (joint + gripper state).",
+                                        doc="Robot state: 7-D vector (x, y, z, rx, ry, rz, gripper).",
                                     ),
                                 }
                             ),
@@ -112,7 +118,7 @@ class AssemblyRobotData(tfds.core.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Define train/val splits."""
-        rlds_dir = "/scratch/pioneer/users/exr343/kth_incoming/rlds_ds_7dim"
+        rlds_dir = "/scratch/pioneer/users/exr343/RLDS_step_2side"
 
         episode_paths = sorted(glob.glob(os.path.join(rlds_dir, "*.pkl")))
         n = len(episode_paths)
@@ -136,12 +142,12 @@ class AssemblyRobotData(tfds.core.GeneratorBasedBuilder):
                 episode = pickle.load(f)
 
             meta = episode["episode_metadata"]
-            data = episode["steps"]  # list of step dicts
+            data = episode["steps"]
 
             episode_steps = []
             n = len(data)
             for i, step in enumerate(data):
-                obs = step["observation"]  # has 'image_0', 'image_1', 'state'
+                obs = step["observation"]
                 lang = step["language_instruction"]
 
                 language_embedding = self._embed([lang])[0].numpy()
@@ -149,9 +155,10 @@ class AssemblyRobotData(tfds.core.GeneratorBasedBuilder):
                 episode_steps.append(
                     {
                         "observation": {
-                            "image":       obs["image_0"],   # side camera
-                            "wrist_image": obs["image_1"],   # wrist camera
-                            "state":       obs["state"],
+                            "image0": obs["image0"],              
+                            "image1": obs["image1"],              
+                            "image_wrist": obs["image_wrist"],    
+                            "state": obs["state"],
                         },
                         "action": step["action"],
                         "discount": 1.0,

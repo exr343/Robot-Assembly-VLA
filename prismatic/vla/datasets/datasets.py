@@ -7,7 +7,7 @@ format to OpenVLA, IterableDataset shim.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Tuple, Type
+from typing import Any, Dict, Sequence, Tuple, Type
 
 import numpy as np
 import torch
@@ -30,7 +30,7 @@ class RLDSBatchTransform:
     image_transform: ImageTransform
     prompt_builder_fn: Type[PromptBuilder]
     predict_stop_token: bool = True
-    use_wrist_image: bool = False
+    additional_image_obs_keys: Sequence[str] = ()
     use_proprio: bool = False
 
     def __call__(self, rlds_batch: Dict[str, Any]) -> Dict[str, Any]:
@@ -73,17 +73,20 @@ class RLDSBatchTransform:
         if not self.predict_stop_token:
             labels[-1] = IGNORE_INDEX
 
-        return_dict = dict(pixel_values=pixel_values, input_ids=input_ids, labels=labels, dataset_name=dataset_name, actions=actions)
+        return_dict = dict(
+            pixel_values=pixel_values, input_ids=input_ids, labels=labels, dataset_name=dataset_name, actions=actions
+        )
 
         # Add additional inputs
-        if self.use_wrist_image:
-            all_wrist_pixels = []
-            for k in rlds_batch["observation"].keys():
-                if "wrist" in k:
-                    img_wrist = Image.fromarray(rlds_batch["observation"][k][0])
-                    pixel_values_wrist = self.image_transform(img_wrist)
-                    all_wrist_pixels.append(pixel_values_wrist)
-            return_dict["pixel_values_wrist"] = torch.cat(all_wrist_pixels, dim=0)
+        if self.additional_image_obs_keys:
+            additional_pixels = []
+            for obs_key in self.additional_image_obs_keys:
+                if obs_key not in rlds_batch["observation"]:
+                    continue
+                img_extra = Image.fromarray(rlds_batch["observation"][obs_key][0])
+                additional_pixels.append(self.image_transform(img_extra))
+            if additional_pixels:
+                return_dict["pixel_values_additional"] = torch.cat(additional_pixels, dim=0)
         if self.use_proprio and "proprio" in rlds_batch["observation"]:
             proprio = rlds_batch["observation"]["proprio"]
             return_dict["proprio"] = proprio
@@ -115,6 +118,8 @@ class RLDSDataset(IterableDataset):
         # fmt: off
         if "aloha" in self.data_mix:
             load_camera_views = ("primary", "left_wrist", "right_wrist")
+        elif self.data_mix == "assembly_robot_data":
+            load_camera_views = ("primary", "secondary", "wrist")
         else:
             load_camera_views = ("primary", "wrist")
 

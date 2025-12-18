@@ -78,8 +78,8 @@ And likewise, the validation loss is seen in the following figure:
 
 The fine-tuned OpenVLA-OFT model forms a policy based on the following inputs and outputs:
 
-- **Input:** joint angles (dim 6), gripper state (dim 1), language instruction, side image (480, 640, 3), wrist image (480, 640, 3)  
-- **Output:** 5-step action chunk: joint control (dim 6), gripper state (dim 1)
+- **Input:** EEF angles [x, y, z, rx, ry, rz] (dim 6), gripper state (dim 1), language instruction, side image (480, 640, 3), wrist image (480, 640, 3)  
+- **Output:** 5-step action chunk: joint control [\theta_1, \theta_2, \theta_3, \theta_4, \theta_5, \theta_6] (dim 6), gripper state (dim 1)
 
 To evaluate the model, the following Python script may be used:
 
@@ -97,18 +97,20 @@ from experiments.robot.openvla_utils import (
 )
 from prismatic.vla.constants import NUM_ACTIONS_CHUNK, PROPRIO_DIM
 
-CHECKPOINT = "/PATH/TO/CHECKPOINT" # included checkpoint based on finetuning script above
-IMG_PATH_SIDE = "/PATH/TO/side_image.png" # (480, 640, 3) PNG file
-IMG_PATH_WRIST = "/PATH/TO/wrist_image.png" # (480, 640, 3) PNG file
-STATE_PATH = "/PATH/TO/states.npy" # (7,) NumPy array
-INSTRUCTION = "put the valve cover assembly onto the cylinder head" # text string
+CHECKPOINT = "/home/exr343/checkpoints/openvla_assembly_robot/VLA_Front_Side_Wrist_ValveCover"
+IMG_PATH_FRONT = "/home/exr343/CIRP_Project/example_demos/Example/front_00000.png" 
+IMG_PATH_SIDE = "/home/exr343/CIRP_Project/example_demos/Example/side_00000.png" 
+IMG_PATH_WRIST = "/home/exr343/CIRP_Project/example_demos/Example/wrist_00000.png" 
+STATE_PATH = "/home/exr343/CIRP_Project/example_demos/Example/states.npy" 
+ACT_PATH = "/home/exr343/CIRP_Project/example_demos/Example/actions.npy" 
+INSTRUCTION = "put the valve cover assembly onto the cylinder head" 
 
 cfg = GenerateConfig(
     pretrained_checkpoint=CHECKPOINT,
     use_l1_regression=True,
     use_diffusion=False,
-    use_film=False,
-    num_images_in_input=2,
+    use_film=True,
+    num_images_in_input=3,
     use_proprio=True,
     load_in_8bit=False,
     load_in_4bit=False,
@@ -125,11 +127,13 @@ proprio_projector = get_proprio_projector(cfg, llm_dim=vla.llm_dim, proprio_dim=
 def load_observation():
     states = np.load(STATE_PATH)
     state = states[0].astype(np.float32)
-    full_image = np.array(Image.open(IMG_PATH_SIDE).convert("RGB"), dtype=np.uint8)
+    front_image = np.array(Image.open(IMG_PATH_FRONT).convert("RGB"), dtype=np.uint8)
+    side_image = np.array(Image.open(IMG_PATH_SIDE).convert("RGB"), dtype=np.uint8)
     wrist_image = np.array(Image.open(IMG_PATH_WRIST).convert("RGB"), dtype=np.uint8)
     obs = {
-        "full_image": full_image,
-        "wrist_image": wrist_image,
+        "full_image": front_image, # front image
+        "wrist_image_side": side_image, # side image
+        "wrist_image": wrist_image, # wrist image
         "state": state,
         "task_description": INSTRUCTION,
     }
@@ -149,4 +153,3 @@ if __name__ == "__main__":
     print("Generated action chunk:")
     for a in actions:
         print(a)
-```

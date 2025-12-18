@@ -124,9 +124,9 @@ class PaddedCollatorForActionPrediction:
 
         # Stack all `pixel_values` --> depending on type is torch.Tensor or Dict[str, torch.Tensor]
         if isinstance(pixel_values[0], torch.Tensor):
-            if "pixel_values_wrist" in instances[0]:
-                pixel_values_wrist = [instance["pixel_values_wrist"] for instance in instances]
-                pixel_values = torch.cat((torch.stack(pixel_values), torch.stack(pixel_values_wrist)), dim=1)
+            if "pixel_values_additional" in instances[0]:
+                additional_pixels = [instance["pixel_values_additional"] for instance in instances]
+                pixel_values = torch.cat((torch.stack(pixel_values), torch.stack(additional_pixels)), dim=1)
             else:
                 pixel_values = torch.stack(pixel_values)
         else:

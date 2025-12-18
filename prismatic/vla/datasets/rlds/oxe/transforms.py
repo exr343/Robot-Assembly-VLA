@@ -850,12 +850,12 @@ def assembly_robot_data_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
     Standardization for 'assembly_robot_dataset'.
 
     Assumes:
-        - trajectory["observation"]["image_0"]: side RGB
-        - trajectory["observation"]["image_1"]: wrist RGB
-        - trajectory["observation"]["state"]: joint positions + gripper state
+        - trajectory["observation"]["image0"]: side RGB 1
+        - trajectory["observation"]["image1"]: side RGB 2
+        - trajectory["observation"]["image_wrist"]: wrist RGB
+        - trajectory["observation"]["state"]: POS_QUAT positions + gripper state
         - trajectory["action"]: joint command + gripper command
 
-    Both state and action are already in JOINT / JOINT_POS form.
     """
     traj_state = trajectory["observation"]["state"]
     trajectory["observation"]["state"] = traj_state[..., :7]
